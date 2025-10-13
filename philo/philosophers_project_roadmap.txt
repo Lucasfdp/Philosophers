@@ -1,0 +1,237 @@
+
+42 Philosophers Project – Roadmap & Conceptual Flow
+===================================================
+
+🧩 Key Components
+-----------------
+You'll ultimately need to write:
+1. Main program: Parses args, initializes everything.
+2. Philosopher struct: Represents each philosopher.
+3. Forks: Shared mutexes between philosophers.
+4. Thread routine: Behavior of each philosopher.
+5. Death checker: Watches for starving philosophers.
+6. Logger: Synchronized printing.
+7. Cleanup: Gracefully destroy all mutexes/threads.
+
+
+
+🏁 Step-by-Step Flow
+--------------------
+
+🔹 1. Understand the Problem (Day 0)
+- Read about the Dining Philosophers Problem:
+  - What is deadlock?
+  - Why is mutual exclusion needed?
+  - Why is starvation possible?
+- Understand the goal: simulate philosophers eating without crashing, deadlocking, or letting anyone die unexpectedly.
+
+New Concepts:
+- Deadlock, Starvation, Race conditions, Mutual exclusion (mutex)
+
+🔹 2. Parse and Validate Input (Day 1)
+- Write your main.c and parse arguments
+- Validate ranges (positive ints only)
+- Store in a global config struct
+
+🔹 3. Define Core Structs (Day 2)
+Create `philo.h`:
+
+🔹 4. Initialize Forks and Philosophers (Day 3)
+- Allocate array of t_philo
+- Create array of pthread_mutex_t forks
+- Assign left and right forks in circular fashion
+
+🔹 5. Create Philosopher Threads (Day 4)
+Each thread runs:
+
+void *philosopher_routine(void *arg);
+
+Loop: Take forks → Eat → Release forks → Sleep → Think
+
+New Concepts:
+- Threads: pthread_create, pthread_join
+- usleep(), gettimeofday()
+
+🔹 6. Time Management (Day 5)
+Use gettimeofday() or clock_gettime()
+- Track when philosophers eat
+- Check if someone has died
+- Print timestamps
+
+Write a get_time_in_ms() function.
+
+🔹 7. Logging with Mutex (Day 5-6)
+- Use print_lock mutex for logging
+- Format: timestamp + philosopher ID + action
+
+🔹 8. Monitor for Death (Day 6)
+- Separate monitor thread or main polling loop
+- If time since last meal > time_to_die → mark death
+
+New Concepts:
+- Shared state monitoring with mutex
+
+🔹 9. Optional Eating Count (Day 7)
+If 5th arg is given:
+- Terminate when all have eaten `n` times
+
+🔹 10. Cleanup (Day 8)
+- Free all memory
+- Destroy all mutexes
+- Join all threads
+
+
+
+
+📘 Concepts to Master
+---------------------
+| Concept         | Description                                  |
+|-----------------|----------------------------------------------|
+| Threads         | pthread_create, pthread_join, detach         |
+| Mutexes         | Locking forks, printing, meal checks         |
+| Race conditions | Prevented with mutexes or atomic values      |
+| Deadlock        | Avoid circular waits (odd/even fork strategy)|
+| Starvation      | Ensure fair scheduling and exit condition    |
+| Timing          | Accurate timestamps with gettimeofday()      |
+| Graceful exit   | Clean up all resources on exit               |
+
+📁 Suggested File Structure
+---------------------------
+philosophers/
+├── Makefile
+├── main.c
+├── init.c
+├── routine.c
+├── monitor.c
+├── time_utils.c
+├── utils.c
+├── philo.h
+
+
+
+🚦 Starter TODO Checklist
+--------------------------
+✅ Parse args & validate  
+✅ Define t_config and t_philo  
+✅ Init forks & philosopher structs  
+✅ Thread creation + routine  
+✅ Accurate sleeping & time checking  
+✅ Death monitor  
+✅ Mutex-protected printing  
+✅ Graceful exit & cleanup
+
+
+
+Dining Philosophers Problem – Full Conceptual Breakdown
+🍝 What is the Dining Philosophers Problem?
+Originally proposed by Edsger Dijkstra, this classic concurrency problem models 
+a situation where a group of philosophers must alternate between thinking and 
+eating, but they must share limited resources (forks) to eat — leading to potential 
+deadlock or starvation.
+
+🎭 Scenario
+N philosophers sit at a round table.
+
+Between each two philosophers is one fork — so N forks total.
+
+A philosopher must pick up two forks (left and right) to eat.
+
+Philosophers must avoid:
+
+Deadlock: Everyone grabs one fork and waits forever.
+
+Starvation: A philosopher never gets to eat.
+
+🧩 Core Simulation Elements (Mapped to Code)
+Concept	Description	Code Element
+Philosopher	A thread that eats/thinks/sleeps	pthread_t, t_philo
+Fork	Shared resource (mutex)	pthread_mutex_t
+Time to die	Max time without eating	Timestamps
+Time to eat/sleep	Duration of actions	usleep, timers
+Meal count	Optional: exit after N meals	meals_eaten counter
+
+
+
+
+⚠️ Problems You Must Prevent
+🔁 Deadlock
+Problem: Each philosopher picks up one fork and waits → no one can eat.
+
+Solutions:
+
+Odd philosophers pick left fork first, even ones right first.
+
+Use a semaphore to allow only N - 1 philosophers to pick up forks at a time.
+
+😵 Starvation
+Problem: One philosopher never gets to eat.
+
+Solutions:
+
+Monitor last meal time.
+
+Use a monitor thread.
+
+Use num_must_eat condition to enforce fairness.
+
+🔧 Resources and Tools Used
+1. Threads (pthread)
+Each philosopher is a thread:
+pthread_create(&philo[i].thread, NULL, &routine, &philo[i]);
+
+2. Mutexes (pthread_mutex)
+Each fork is a mutex:
+pthread_mutex_lock(philo->left_fork);
+pthread_mutex_lock(philo->right_fork);
+Also used for logging and death detection.
+
+3. Timers
+Use gettimeofday() or clock_gettime() for millisecond precision.
+Avoid sleep() — use usleep() + custom accurate sleep.
+
+4. Synchronization
+Protect shared data:
+last_meal_time
+someone_died
+meals_eaten
+Use mutexes for race-free access.
+
+5. Logging
+Use mutex around printf to avoid jumbled logs.
+Example format:
+[123456] 3 is eating
+
+
+
+🛡️ Strategy Summary
+✅ Avoid Deadlock:
+
+Use fork-pickup order (odd/even)
+Limit concurrent philosophers
+
+✅ Prevent Starvation:
+
+Use monitor thread
+Track and update last_meal_time
+
+✅ Clean Architecture:
+
+1 thread per philosopher
+1 monitor thread
+Mutex per fork + for printing
+
+📚 Concept Recap
+Term	Meaning
+Thread	One philosopher = one thread
+Mutex	Lock to prevent simultaneous resource access
+Deadlock	Everyone waiting for each other forever
+Starvation	Someone never gets to eat
+Race condition	Conflicting thread access to shared data
+Mutual exclusion	One thread at a time in critical sections
+Critical section	Shared-resource code needing protection
+
+🧠 Analogy
+Imagine 5 developers with one keyboard between each pair. To commit code, they need both left and right keyboards.
+If everyone grabs one and waits for the other — deadlock.
+If one is constantly skipped — starvation.
+
