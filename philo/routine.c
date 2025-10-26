@@ -69,46 +69,54 @@ void	*philosopher_routine(void *arg)
 	return (NULL);
 }
 
-void	*monitor_routine(void *arg)
+void *monitor_routine(void *arg)
 {
-	t_config	*info = (t_config *)arg;
-	int			i;
-	long		now;
+    t_config *info = (t_config *)arg;
+    int i;
+    long now;
 
-	while (1)
-	{
-		if (info->num_must_eat > 0)
-		{
-			pthread_mutex_lock(&info->eat_count_lock);
-			if (info->philos_done_eating == info->num_philos)
-			{
-				pthread_mutex_unlock(&info->eat_count_lock);
-				pthread_mutex_lock(&info->death_lock);
-				info->someone_died = 1;
-				pthread_mutex_unlock(&info->death_lock);
-				return (NULL);
-			}
-			pthread_mutex_unlock(&info->eat_count_lock);
-		}
-		i = 0;
-		while (i < info->num_philos)
-		{
-			pthread_mutex_lock(&info->philos[i].meal_lock);
-			now = get_time_in_ms();
-			if (now - info->philos[i].last_meal_time > info->time_to_die)
-			{
-				pthread_mutex_lock(&info->death_lock);
-				info->someone_died = 1;
-				pthread_mutex_unlock(&info->death_lock);
+    while (1)
+    {
+        // Check if all philosophers have eaten enough
+        if (info->num_must_eat > 0)
+        {
+            pthread_mutex_lock(&info->eat_count_lock);
+            if (info->philos_done_eating == info->num_philos)
+            {
+                pthread_mutex_unlock(&info->eat_count_lock);
+                pthread_mutex_lock(&info->death_lock);
+                info->someone_died = 1;
+                pthread_mutex_unlock(&info->death_lock);
+                return (NULL);
+            }
+            pthread_mutex_unlock(&info->eat_count_lock);
+        }
 
-				safe_print(&info->philos[i], "died");
-				pthread_mutex_unlock(&info->philos[i].meal_lock);
-				return (NULL);
-			}
-			pthread_mutex_unlock(&info->philos[i].meal_lock);
-			i++;
-		}
-		usleep(1000);
-	}
-	return (NULL);
+        // Check for deaths
+        i = 0;
+        while (i < info->num_philos)
+        {
+            pthread_mutex_lock(&info->philos[i].meal_lock);
+            now = get_time_in_ms();
+            if (now - info->philos[i].last_meal_time > info->time_to_die)
+            {
+                pthread_mutex_unlock(&info->philos[i].meal_lock);
+                
+                pthread_mutex_lock(&info->death_lock);
+                if (!info->someone_died)  // ADD: Check if not already dead
+                {
+                    info->someone_died = 1;
+                    pthread_mutex_unlock(&info->death_lock);
+                    safe_print(&info->philos[i], "died");
+                }
+                else
+                    pthread_mutex_unlock(&info->death_lock);
+                return (NULL);
+            }
+            pthread_mutex_unlock(&info->philos[i].meal_lock);
+            i++;
+        }
+        usleep(1000);
+    }
+    return (NULL);
 }

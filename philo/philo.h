@@ -11,31 +11,32 @@
 
 typedef struct s_config 
 {
-    int num_philos;
-    int time_to_die;
-    int time_to_eat;
-    int time_to_sleep;
-    int num_must_eat;
-    long start_time;
-    int someone_died;
-	int	philos_done_eating;
-	pthread_mutex_t	eat_count_lock;
-    pthread_mutex_t print_lock;
-    pthread_mutex_t death_lock;
-	pthread_mutex_t	*forks;
-	struct s_philo	*philos;
+	int num_philos;
+	int time_to_die;
+	int time_to_eat;
+	int time_to_sleep;
+	int num_must_eat;
+	long start_time;
+	int someone_died;
+	int philos_done_eating;
+	int threads_created;
+	pthread_mutex_t eat_count_lock;
+	pthread_mutex_t print_lock;
+	pthread_mutex_t death_lock;
+	pthread_mutex_t *forks;
+	struct s_philo *philos;
 } t_config;
 
 typedef struct s_philo 
 {
-    int id;
-    int meals_eaten;
-    long last_meal_time;
-    pthread_t thread;
-    pthread_mutex_t *left_fork;
-    pthread_mutex_t *right_fork;
-    pthread_mutex_t meal_lock;
-    t_config *config;
+	int id;
+	int meals_eaten;
+	long last_meal_time;
+	pthread_t thread;
+	pthread_mutex_t *left_fork;
+	pthread_mutex_t *right_fork;
+	pthread_mutex_t meal_lock;
+	t_config *config;
 } t_philo;
 
 int		ft_atoi(char *str);

@@ -50,16 +50,16 @@ void	destroy_mutex(t_config *philo_info)
 		pthread_mutex_destroy(&philo_info->eat_count_lock);
 }
 
-void	free_all(t_config *philo_info, int destroy_mutexes)
+void free_all(t_config *philo_info, int destroy_mutexes)
 {
-	int	i;
+	int i;
 
 	if (!philo_info)
 		return ;
 	if (philo_info->philos)
 	{
 		i = 0;
-		while (i < philo_info->num_philos)
+		while (i < philo_info->threads_created)
 		{
 			pthread_join(philo_info->philos[i].thread, NULL);
 			i++;
