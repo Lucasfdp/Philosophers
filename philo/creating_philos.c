@@ -29,7 +29,7 @@ void initialise_philosophers(t_config *philo_info)
     {
         philo_info->philos[i].id = i + 1;
         philo_info->philos[i].meals_eaten = 0;
-        philo_info->philos[i].last_meal_time = philo_info->start_time;
+        philo_info->philos[i].last_meal_time = 0;
         philo_info->philos[i].config = philo_info;
         philo_info->philos[i].thread = 0;
         pthread_mutex_init(&philo_info->philos[i].meal_lock, NULL);

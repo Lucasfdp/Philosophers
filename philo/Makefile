@@ -1,4 +1,5 @@
 CC = cc
+#-g3 -fsanitize=address
 CFLAGS = -Wall -Wextra -Werror
 NAME = philo
 
