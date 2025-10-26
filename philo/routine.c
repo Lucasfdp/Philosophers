@@ -75,21 +75,21 @@ void	*monitor_routine(void *arg)
 	int			i;
 	long		now;
 
-	if (info->num_must_eat > 0)
-	{
-		pthread_mutex_lock(&info->eat_count_lock);
-		if (info->philos_done_eating == info->num_philos)
-		{
-			pthread_mutex_unlock(&info->eat_count_lock);
-			pthread_mutex_lock(&info->death_lock);
-			info->someone_died = 1;
-			pthread_mutex_unlock(&info->death_lock);
-			return (NULL);
-		}
-		pthread_mutex_unlock(&info->eat_count_lock);
-	}
 	while (1)
 	{
+		if (info->num_must_eat > 0)
+		{
+			pthread_mutex_lock(&info->eat_count_lock);
+			if (info->philos_done_eating == info->num_philos)
+			{
+				pthread_mutex_unlock(&info->eat_count_lock);
+				pthread_mutex_lock(&info->death_lock);
+				info->someone_died = 1;
+				pthread_mutex_unlock(&info->death_lock);
+				return (NULL);
+			}
+			pthread_mutex_unlock(&info->eat_count_lock);
+		}
 		i = 0;
 		while (i < info->num_philos)
 		{
