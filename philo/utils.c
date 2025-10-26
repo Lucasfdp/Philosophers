@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: luferna3 <luferna3@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/26 06:45:00 by luferna3          #+#    #+#             */
+/*   Updated: 2025/10/26 07:05:12 by luferna3         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 int	ft_atoi(char *str)
@@ -29,30 +41,30 @@ void	destroy_mutex(t_config *philo_info)
 
 	i = 0;
 	if (philo_info->philos)
+	{
+		while (i < philo_info->num_philos)
 		{
-			while (i < philo_info->num_philos)
-			{
-				pthread_mutex_destroy(&philo_info->philos[i].meal_lock);
-				i++;
-			}
+			pthread_mutex_destroy(&philo_info->philos[i].meal_lock);
+			i++;
 		}
-		if (philo_info->forks)
+	}
+	if (philo_info->forks)
+	{
+		i = 0;
+		while (i < philo_info->num_philos)
 		{
-			i = 0;
-			while (i < philo_info->num_philos)
-			{
-				pthread_mutex_destroy(&philo_info->forks[i]);
-				i++;
-			}
+			pthread_mutex_destroy(&philo_info->forks[i]);
+			i++;
 		}
-		pthread_mutex_destroy(&philo_info->print_lock);
-		pthread_mutex_destroy(&philo_info->death_lock);
-		pthread_mutex_destroy(&philo_info->eat_count_lock);
+	}
+	pthread_mutex_destroy(&philo_info->print_lock);
+	pthread_mutex_destroy(&philo_info->death_lock);
+	pthread_mutex_destroy(&philo_info->eat_count_lock);
 }
 
-void free_all(t_config *philo_info, int destroy_mutexes)
+void	free_all(t_config *philo_info, int destroy_mutexes)
 {
-	int i;
+	int	i;
 
 	if (!philo_info)
 		return ;
@@ -79,12 +91,10 @@ void	safe_print(t_philo *philo, char *msg)
 
 	pthread_mutex_lock(&philo->config->print_lock);
 	time = get_time_in_ms() - philo->config->start_time;
-
 	pthread_mutex_lock(&philo->config->death_lock);
 	if (!philo->config->someone_died)
 		printf("%ld %d %s\n", time, philo->id, msg);
 	pthread_mutex_unlock(&philo->config->death_lock);
-
 	pthread_mutex_unlock(&philo->config->print_lock);
 }
 
