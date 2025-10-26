@@ -53,5 +53,6 @@ void	eat(t_philo *philo);
 void	release_forks(t_philo *philo);
 void	*philosopher_routine(void *arg);
 void	*monitor_routine(void *arg);
+void *single_philosopher_routine(void *arg);
 
 #endif
